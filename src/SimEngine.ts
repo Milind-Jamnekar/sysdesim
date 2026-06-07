@@ -79,6 +79,8 @@ export class SimEngine {
   private prevDbP99 = BASE_LAT['db']
   private onTickCb: (snapshot: Snapshot) => void
   private baseLoad = BASE_LOAD
+  private historyBuffer: Snapshot[] = []
+  private readonly MAX_HISTORY = 600
 
   constructor(onTick: (snapshot: Snapshot) => void) {
     this.onTickCb = onTick
@@ -98,6 +100,7 @@ export class SimEngine {
   }
 
   start(): void {
+    if (this.intervalId !== null) return
     this.intervalId = setInterval(() => this.tick(), 100)
   }
 
@@ -106,6 +109,16 @@ export class SimEngine {
       clearInterval(this.intervalId)
       this.intervalId = null
     }
+  }
+
+  pause(): void { this.stop() }
+  resume(): void { this.start() }
+  isPlaying(): boolean { return this.intervalId !== null }
+
+  get historyLength(): number { return this.historyBuffer.length }
+
+  getHistoryAt(index: number): Snapshot | undefined {
+    return this.historyBuffer[index]
   }
 
   setBaseLoad(n: number): void {
@@ -175,7 +188,10 @@ export class SimEngine {
     this.prevDbP99       = db.p99Latency
 
     this.tickCount++
-    this.onTickCb(this.makeSnapshot())
+    const snap = this.makeSnapshot()
+    this.historyBuffer.push(snap)
+    if (this.historyBuffer.length > this.MAX_HISTORY) this.historyBuffer.shift()
+    this.onTickCb(snap)
   }
 
   private processNode(node: NodeData, incomingLoad: number, capacity: number, baseLat: number): void {

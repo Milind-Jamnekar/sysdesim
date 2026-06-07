@@ -2,13 +2,9 @@ import { SimEngine, type Snapshot } from './SimEngine.js'
 import { D3Renderer } from './D3Renderer.js'
 
 let lastSnap: Snapshot | null = null
+let paused = false
 
-const engine = new SimEngine((snap) => {
-  lastSnap = snap
-  renderer.render(snap)
-  updateButtons(snap)
-})
-
+// DOM elements
 const graphEl        = document.getElementById('graph')!
 const chartsEl       = document.getElementById('charts')!
 const killBtn        = document.getElementById('btn-kill')         as HTMLButtonElement
@@ -20,9 +16,25 @@ const killAppBBtn    = document.getElementById('btn-kill-app-b')   as HTMLButton
 const recoverAppsBtn = document.getElementById('btn-recover-apps') as HTMLButtonElement
 const loadSlider     = document.getElementById('load-slider')      as HTMLInputElement
 const loadValue      = document.getElementById('load-value')!
+const playPauseBtn   = document.getElementById('btn-playpause')    as HTMLButtonElement
+const timelineSlider = document.getElementById('timeline-slider')  as HTMLInputElement
+const timelineTime   = document.getElementById('timeline-time')!
 
 const renderer = new D3Renderer(graphEl, chartsEl)
 
+const engine = new SimEngine((snap) => {
+  lastSnap = snap
+  if (!paused) {
+    renderer.render(snap)
+    updateButtons(snap)
+    const hi = Math.max(engine.historyLength - 1, 0)
+    timelineSlider.max   = String(hi)
+    timelineSlider.value = String(hi)
+    timelineTime.textContent = 'live'
+  }
+})
+
+// ── Cache buttons ──
 killBtn.addEventListener('click', () => {
   engine.setNodeState('cache', 'failed')
 })
@@ -37,6 +49,7 @@ recoverBtn.addEventListener('click', () => {
   }
 })
 
+// ── LB buttons ──
 killLbBtn.addEventListener('click', () => {
   engine.setNodeState('lb', 'failed')
 })
@@ -45,6 +58,7 @@ recoverLbBtn.addEventListener('click', () => {
   engine.setNodeState('lb', 'recovering')
 })
 
+// ── App server buttons ──
 killAppABtn.addEventListener('click', () => {
   engine.setNodeState('appA', 'failed')
 })
@@ -64,12 +78,59 @@ recoverAppsBtn.addEventListener('click', () => {
   }
 })
 
+// ── Load slider ──
 loadSlider.addEventListener('input', () => {
   const v = Number(loadSlider.value)
   loadValue.textContent = String(v)
   engine.setBaseLoad(v)
 })
 
+// ── Timeline ──
+function goPaused(): void {
+  if (paused) return
+  paused = true
+  engine.pause()
+  playPauseBtn.textContent = '▶'
+  playPauseBtn.setAttribute('aria-label', 'Resume simulation')
+}
+
+function goLive(): void {
+  paused = false
+  engine.resume()
+  playPauseBtn.textContent = '⏸'
+  playPauseBtn.setAttribute('aria-label', 'Pause simulation')
+  timelineTime.textContent = 'live'
+  if (lastSnap) {
+    renderer.render(lastSnap)
+    updateButtons(lastSnap)
+  }
+}
+
+playPauseBtn.addEventListener('click', () => {
+  if (paused) goLive(); else goPaused()
+})
+
+timelineSlider.addEventListener('mousedown', () => {
+  if (!paused) goPaused()
+})
+
+timelineSlider.addEventListener('touchstart', () => {
+  if (!paused) goPaused()
+}, { passive: true })
+
+timelineSlider.addEventListener('input', () => {
+  const idx    = Number(timelineSlider.value)
+  const snap   = engine.getHistoryAt(idx)
+  if (!snap) return
+  renderer.renderGraph(snap)
+  updateButtons(snap)
+  const ticksFromEnd = (engine.historyLength - 1) - idx
+  timelineTime.textContent = ticksFromEnd === 0
+    ? 'live'
+    : `-${(ticksFromEnd / 10).toFixed(1)}s`
+})
+
+// ── Button state helpers ──
 function setBtn(killEl: HTMLButtonElement, recoverEl: HTMLButtonElement, isDown: boolean): void {
   killEl.disabled    = isDown
   recoverEl.disabled = !isDown

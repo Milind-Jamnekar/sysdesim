@@ -71,20 +71,22 @@ export class D3Renderer {
     this.buildCharts(chartsEl)
   }
 
-  render(snap: Snapshot): void {
+  renderGraph(snap: Snapshot): void {
     const byId = new Map(snap.nodes.map(n => [n.id, n]))
-
-    // Update nodes
     this.graphSvg.selectAll<SVGCircleElement, NodeId>('.node-circle')
       .attr('fill', id => STATE_COLORS[byId.get(id)!.state])
-
     this.graphSvg.selectAll<SVGTextElement, NodeId>('.node-queue')
       .text(id => {
         const n = byId.get(id)!
         const cap = id === 'lb' ? 5000 : (id === 'appA' || id === 'appB' ? 2000 : id === 'cache' ? 3000 : 400)
-        const pct = Math.round((n.queueDepth / cap) * 100)
-        return `${pct}%`
+        return `${Math.round((n.queueDepth / cap) * 100)}%`
       })
+  }
+
+  render(snap: Snapshot): void {
+    this.renderGraph(snap)
+
+    const byId = new Map(snap.nodes.map(n => [n.id as string, n]))
 
     // Append to ring buffer
     for (const id of CHART_NODES) {

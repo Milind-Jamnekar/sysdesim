@@ -61,6 +61,23 @@
       <!-- Right: metric charts -->
       <section class="charts-panel" id="charts" aria-label="Metric charts" aria-hidden="true"></section>
     </main>
+
+    <footer class="timeline-bar" aria-label="Playback timeline">
+      <button id="btn-playpause" class="btn btn-timeline" aria-label="Pause simulation">⏸</button>
+      <div class="timeline-track">
+        <input
+          type="range"
+          id="timeline-slider"
+          class="timeline-slider"
+          min="0"
+          max="0"
+          value="0"
+          step="1"
+          aria-label="Scrub through recorded history"
+        />
+      </div>
+      <span id="timeline-time" class="timeline-time">live</span>
+    </footer>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
