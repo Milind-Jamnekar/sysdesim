@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sysdesim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- Mobile notice (hidden on desktop) -->
+  <div class="mobile-notice" role="alert" aria-live="polite">
+    Open on a desktop browser for the full simulation.
+  </div>
+
+  <div class="app">
+    <header class="app-header">
+      <h1 class="app-title">sysdesim</h1>
+    </header>
+
+    <main class="app-body">
+      <!-- Left: topology graph -->
+      <section class="graph-panel" aria-label="Topology graph">
+        <div id="graph"></div>
+        <div class="controls">
+          <button
+            id="btn-kill"
+            class="btn btn-kill"
+            aria-label="Kill Cache — inject cache failure"
+          >Kill Cache</button>
+          <button
+            id="btn-recover"
+            class="btn btn-recover"
+            disabled
+            aria-label="Recover Cache — restore cache from failure"
+            aria-disabled="true"
+          >Recover Cache</button>
+        </div>
+        <p class="hint">Start here — kill the cache and watch the cascade.</p>
+      </section>
+
+      <!-- Right: metric charts -->
+      <section class="charts-panel" id="charts" aria-label="Metric charts" aria-hidden="true"></section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
