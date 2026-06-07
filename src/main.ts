@@ -9,12 +9,17 @@ const engine = new SimEngine((snap) => {
   updateButtons(snap)
 })
 
-const graphEl    = document.getElementById('graph')!
-const chartsEl   = document.getElementById('charts')!
-const killBtn    = document.getElementById('btn-kill')    as HTMLButtonElement
-const recoverBtn = document.getElementById('btn-recover') as HTMLButtonElement
-const loadSlider = document.getElementById('load-slider') as HTMLInputElement
-const loadValue  = document.getElementById('load-value')!
+const graphEl        = document.getElementById('graph')!
+const chartsEl       = document.getElementById('charts')!
+const killBtn        = document.getElementById('btn-kill')         as HTMLButtonElement
+const recoverBtn     = document.getElementById('btn-recover')      as HTMLButtonElement
+const killLbBtn      = document.getElementById('btn-kill-lb')      as HTMLButtonElement
+const recoverLbBtn   = document.getElementById('btn-recover-lb')   as HTMLButtonElement
+const killAppABtn    = document.getElementById('btn-kill-app-a')   as HTMLButtonElement
+const killAppBBtn    = document.getElementById('btn-kill-app-b')   as HTMLButtonElement
+const recoverAppsBtn = document.getElementById('btn-recover-apps') as HTMLButtonElement
+const loadSlider     = document.getElementById('load-slider')      as HTMLInputElement
+const loadValue      = document.getElementById('load-value')!
 
 const renderer = new D3Renderer(graphEl, chartsEl)
 
@@ -32,19 +37,66 @@ recoverBtn.addEventListener('click', () => {
   }
 })
 
+killLbBtn.addEventListener('click', () => {
+  engine.setNodeState('lb', 'failed')
+})
+
+recoverLbBtn.addEventListener('click', () => {
+  engine.setNodeState('lb', 'recovering')
+})
+
+killAppABtn.addEventListener('click', () => {
+  engine.setNodeState('appA', 'failed')
+})
+
+killAppBBtn.addEventListener('click', () => {
+  engine.setNodeState('appB', 'failed')
+})
+
+recoverAppsBtn.addEventListener('click', () => {
+  if (lastSnap) {
+    for (const id of ['appA', 'appB'] as const) {
+      const n = lastSnap.nodes.find(n => n.id === id)!
+      if (n.state === 'failed' || n.state === 'degraded') {
+        engine.setNodeState(id, 'recovering')
+      }
+    }
+  }
+})
+
 loadSlider.addEventListener('input', () => {
   const v = Number(loadSlider.value)
   loadValue.textContent = String(v)
   engine.setBaseLoad(v)
 })
 
+function setBtn(killEl: HTMLButtonElement, recoverEl: HTMLButtonElement, isDown: boolean): void {
+  killEl.disabled    = isDown
+  recoverEl.disabled = !isDown
+  killEl.setAttribute('aria-disabled',    String(isDown))
+  recoverEl.setAttribute('aria-disabled', String(!isDown))
+}
+
 function updateButtons(snap: Snapshot): void {
-  const cache = snap.nodes.find(n => n.id === 'cache')!
-  const isCacheDown = cache.state === 'failed' || cache.state === 'recovering'
-  killBtn.disabled    = isCacheDown
-  recoverBtn.disabled = !isCacheDown
-  killBtn.setAttribute('aria-disabled',    String(isCacheDown))
-  recoverBtn.setAttribute('aria-disabled', String(!isCacheDown))
+  const byId = new Map(snap.nodes.map(n => [n.id as string, n]))
+
+  const isDown = (id: string) => {
+    const s = byId.get(id)!.state
+    return s === 'failed' || s === 'recovering'
+  }
+
+  setBtn(killBtn,   recoverBtn,   isDown('cache'))
+  setBtn(killLbBtn, recoverLbBtn, isDown('lb'))
+
+  const appADown = isDown('appA')
+  const appBDown = isDown('appB')
+  killAppABtn.disabled = appADown
+  killAppABtn.setAttribute('aria-disabled', String(appADown))
+  killAppBBtn.disabled = appBDown
+  killAppBBtn.setAttribute('aria-disabled', String(appBDown))
+  const anyAppDown = appADown || appBDown
+  recoverAppsBtn.disabled = !anyAppDown
+  recoverAppsBtn.setAttribute('aria-disabled', String(!anyAppDown))
 }
 
 engine.start()

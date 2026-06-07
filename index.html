@@ -26,18 +26,19 @@
       <section class="graph-panel" aria-label="Topology graph">
         <div id="graph"></div>
         <div class="controls">
-          <button
-            id="btn-kill"
-            class="btn btn-kill"
-            aria-label="Kill Cache — inject cache failure"
-          >Kill Cache</button>
-          <button
-            id="btn-recover"
-            class="btn btn-recover"
-            disabled
-            aria-label="Recover Cache — restore cache from failure"
-            aria-disabled="true"
-          >Recover Cache</button>
+          <div class="control-row">
+            <button id="btn-kill" class="btn btn-kill" aria-label="Kill Cache">Kill Cache</button>
+            <button id="btn-recover" class="btn btn-recover" disabled aria-label="Recover Cache" aria-disabled="true">Recover Cache</button>
+          </div>
+          <div class="control-row">
+            <button id="btn-kill-lb" class="btn btn-kill" aria-label="Kill LB">Kill LB</button>
+            <button id="btn-recover-lb" class="btn btn-recover" disabled aria-label="Recover LB" aria-disabled="true">Recover LB</button>
+          </div>
+          <div class="control-row">
+            <button id="btn-kill-app-a" class="btn btn-kill" aria-label="Kill App A">Kill App A</button>
+            <button id="btn-kill-app-b" class="btn btn-kill" aria-label="Kill App B">Kill App B</button>
+            <button id="btn-recover-apps" class="btn btn-recover" disabled aria-label="Recover App Servers" aria-disabled="true">Recover Apps</button>
+          </div>
         </div>
         <div class="load-control">
           <label class="load-label" for="load-slider">

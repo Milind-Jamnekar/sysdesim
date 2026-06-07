@@ -137,8 +137,13 @@ export class SimEngine {
     // Topological order: each node's incomingLoad set from upstream effectiveThroughput (same tick)
     this.processNode(lb, this.baseLoad, CAPACITY['lb'], BASE_LAT['lb'])
 
-    this.processAppServer(appA, lb.effectiveThroughput * 0.5, CAPACITY['appA'])
-    this.processAppServer(appB, lb.effectiveThroughput * 0.5, CAPACITY['appB'])
+    // Smart split: route away from failed app servers
+    const appADown = appA.state === 'failed'
+    const appBDown = appB.state === 'failed'
+    const splitA = appADown ? 0 : (appBDown ? 1 : 0.5)
+    const splitB = appBDown ? 0 : (appADown ? 1 : 0.5)
+    this.processAppServer(appA, lb.effectiveThroughput * splitA, CAPACITY['appA'])
+    this.processAppServer(appB, lb.effectiveThroughput * splitB, CAPACITY['appB'])
 
     const totalAppET = appA.effectiveThroughput + appB.effectiveThroughput
     this.processNode(cache, totalAppET, CAPACITY['cache'], BASE_LAT['cache'])
