@@ -78,6 +78,7 @@ export class SimEngine {
   private prevDbErrorRate = 0
   private prevDbP99 = BASE_LAT['db']
   private onTickCb: (snapshot: Snapshot) => void
+  private baseLoad = BASE_LOAD
 
   constructor(onTick: (snapshot: Snapshot) => void) {
     this.onTickCb = onTick
@@ -107,6 +108,10 @@ export class SimEngine {
     }
   }
 
+  setBaseLoad(n: number): void {
+    this.baseLoad = n
+  }
+
   setNodeState(nodeId: string, state: NodeState): void {
     const node = this.nodes.get(nodeId as NodeId)
     if (!node) throw new Error(`Unknown node: ${nodeId}`)
@@ -130,7 +135,7 @@ export class SimEngine {
     const cacheMissRate = cache.state === 'failed' ? 1.0 : (1 - CACHE_HIT_RATE_HEALTHY)
 
     // Topological order: each node's incomingLoad set from upstream effectiveThroughput (same tick)
-    this.processNode(lb, BASE_LOAD, CAPACITY['lb'], BASE_LAT['lb'])
+    this.processNode(lb, this.baseLoad, CAPACITY['lb'], BASE_LAT['lb'])
 
     this.processAppServer(appA, lb.effectiveThroughput * 0.5, CAPACITY['appA'])
     this.processAppServer(appB, lb.effectiveThroughput * 0.5, CAPACITY['appB'])

@@ -13,6 +13,8 @@ const graphEl    = document.getElementById('graph')!
 const chartsEl   = document.getElementById('charts')!
 const killBtn    = document.getElementById('btn-kill')    as HTMLButtonElement
 const recoverBtn = document.getElementById('btn-recover') as HTMLButtonElement
+const loadSlider = document.getElementById('load-slider') as HTMLInputElement
+const loadValue  = document.getElementById('load-value')!
 
 const renderer = new D3Renderer(graphEl, chartsEl)
 
@@ -28,6 +30,12 @@ recoverBtn.addEventListener('click', () => {
       engine.setNodeState('db', 'recovering')
     }
   }
+})
+
+loadSlider.addEventListener('input', () => {
+  const v = Number(loadSlider.value)
+  loadValue.textContent = String(v)
+  engine.setBaseLoad(v)
 })
 
 function updateButtons(snap: Snapshot): void {

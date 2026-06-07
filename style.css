@@ -116,6 +116,63 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Load control ── */
+.load-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.load-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  text-align: center;
+}
+
+.load-label #load-value {
+  font-family: var(--font-mono);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.load-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.load-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.load-slider::-webkit-slider-thumb:hover {
+  background: var(--text);
+}
+
+.load-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--text-muted);
+  cursor: pointer;
+}
+
 /* ── Buttons ── */
 .btn {
   font-family: var(--font-ui);
