@@ -19,6 +19,9 @@ const loadValue      = document.getElementById('load-value')!
 const playPauseBtn   = document.getElementById('btn-playpause')    as HTMLButtonElement
 const timelineSlider = document.getElementById('timeline-slider')  as HTMLInputElement
 const timelineTime   = document.getElementById('timeline-time')!
+const tabGraph       = document.getElementById('tab-graph')        as HTMLButtonElement
+const tabCharts      = document.getElementById('tab-charts')       as HTMLButtonElement
+const appEl          = document.querySelector('.app')              as HTMLElement
 
 const renderer = new D3Renderer(graphEl, chartsEl)
 
@@ -159,5 +162,17 @@ function updateButtons(snap: Snapshot): void {
   recoverAppsBtn.disabled = !anyAppDown
   recoverAppsBtn.setAttribute('aria-disabled', String(!anyAppDown))
 }
+
+// ── Mobile tabs ──
+function activateTab(tab: 'graph' | 'charts'): void {
+  appEl.setAttribute('data-tab', tab)
+  tabGraph.classList.toggle('tab-active',  tab === 'graph')
+  tabCharts.classList.toggle('tab-active', tab === 'charts')
+  tabGraph.setAttribute('aria-selected',  String(tab === 'graph'))
+  tabCharts.setAttribute('aria-selected', String(tab === 'charts'))
+}
+
+tabGraph.addEventListener('click',  () => activateTab('graph'))
+tabCharts.addEventListener('click', () => activateTab('charts'))
 
 engine.start()

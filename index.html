@@ -11,15 +11,16 @@
 </head>
 <body>
 
-  <!-- Mobile notice (hidden on desktop) -->
-  <div class="mobile-notice" role="alert" aria-live="polite">
-    Open on a desktop browser for the full simulation.
-  </div>
-
-  <div class="app">
+  <div class="app" data-tab="graph">
     <header class="app-header">
       <h1 class="app-title">sysdesim</h1>
     </header>
+
+    <!-- Tab bar — only visible on mobile -->
+    <nav class="mobile-tabs" aria-label="View tabs">
+      <button id="tab-graph"  class="tab-btn tab-active" aria-selected="true">Graph</button>
+      <button id="tab-charts" class="tab-btn"            aria-selected="false">Charts</button>
+    </nav>
 
     <main class="app-body">
       <!-- Left: topology graph -->

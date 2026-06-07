@@ -31,24 +31,77 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Mobile notice ── */
-.mobile-notice {
+/* ── Mobile tabs (hidden on desktop) ── */
+.mobile-tabs {
   display: none;
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 16px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  z-index: 100;
 }
 
 @media (max-width: 768px) {
-  .mobile-notice { display: flex; }
-  .app { display: none; }
+  /* ── Mobile layout ── */
+  .app {
+    height: 100dvh;
+  }
+
+  .mobile-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.12s, border-color 0.12s;
+  }
+
+  .tab-btn.tab-active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+  }
+
+  /* Show/hide panels based on active tab */
+  .app[data-tab="graph"]  .charts-panel { display: none; }
+  .app[data-tab="charts"] .graph-panel  { display: none; }
+
+  /* Stack panels vertically when visible */
+  .app-body {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .graph-panel {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #graph {
+    max-height: 260px;
+  }
+
+  .charts-panel {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* Touch-friendly buttons on mobile */
+  .btn {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .control-row {
+    gap: 5px;
+  }
 }
 
 /* ── App shell ── */
