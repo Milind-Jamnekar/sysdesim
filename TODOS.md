@@ -74,4 +74,8 @@
 
 ## Completed
 
-_(none yet)_
+- **Load adjustability (req/s slider)** — `SimEngine.setBaseLoad()` + range input, 100–2000 req/s
+- **Kill LB + Kill App Servers** — 5 new buttons, smart LB routing around failed app servers
+- **Snapshot recording + time scrubber** — 600-tick ring buffer, ⏸/▶ + drag-to-scrub timeline bar
+- **Edge load visualization** — stroke-width lerp 1px→6px, normalized by destination capacity
+- **Mobile layout** — Graph/Charts tab switcher, single-column below 768px, timeline bar always visible
