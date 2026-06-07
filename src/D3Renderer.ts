@@ -35,6 +35,24 @@ const EDGES: [NodeId, NodeId][] = [
   ['cache', 'db'],
 ]
 
+// Normalize edge load by destination capacity so the edge goes "full" when the
+// destination is at its limit. Two app servers share the cache, so each is
+// measured against half the cache capacity.
+const EDGE_CAP: Record<string, number> = {
+  appA: 2000, appB: 2000, cache: 1500, db: 400,
+}
+
+function edgeLoad(byId: Map<string, import('./SimEngine.js').NodeSnapshot>, from: NodeId, to: NodeId): number {
+  if (to === 'appA' || to === 'appB') return byId.get(to)!.incomingLoad
+  if (to === 'cache') return byId.get(from)!.throughput
+  if (to === 'db')    return byId.get('db')!.incomingLoad
+  return 0
+}
+
+function edgeStrokeWidth(load: number, destCap: number): number {
+  return 1 + Math.min(load / destCap, 1) * 5
+}
+
 interface HistoryEntry { throughput: number; p99Latency: number; errorRate: number }
 
 type ChartDef = { key: keyof HistoryEntry; label: string; unit: string; maxY: number | null }
@@ -72,7 +90,7 @@ export class D3Renderer {
   }
 
   renderGraph(snap: Snapshot): void {
-    const byId = new Map(snap.nodes.map(n => [n.id, n]))
+    const byId = new Map(snap.nodes.map(n => [n.id as string, n]))
     this.graphSvg.selectAll<SVGCircleElement, NodeId>('.node-circle')
       .attr('fill', id => STATE_COLORS[byId.get(id)!.state])
     this.graphSvg.selectAll<SVGTextElement, NodeId>('.node-queue')
@@ -81,6 +99,12 @@ export class D3Renderer {
         const cap = id === 'lb' ? 5000 : (id === 'appA' || id === 'appB' ? 2000 : id === 'cache' ? 3000 : 400)
         return `${Math.round((n.queueDepth / cap) * 100)}%`
       })
+    for (const [from, to] of EDGES) {
+      const load = edgeLoad(byId, from, to)
+      const sw   = edgeStrokeWidth(load, EDGE_CAP[to])
+      this.graphSvg.select(`.edge-${from}-${to}`)
+        .attr('stroke-width', sw)
+    }
   }
 
   render(snap: Snapshot): void {
@@ -171,6 +195,7 @@ export class D3Renderer {
       const [x1, y1] = offsetPoint(to, from, ARROW_OFFSET)
       const [x2, y2] = offsetPoint(from, to,  ARROW_OFFSET)
       svg.append('line')
+        .attr('class', `edge edge-${fromId}-${toId}`)
         .attr('x1', x1).attr('y1', y1)
         .attr('x2', x2).attr('y2', y2)
         .attr('stroke', '#334155')
